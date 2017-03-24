@@ -23,7 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
 
     //Database name
-    private static final String DATABASE_NAME = "tripsMenager";
+    private static final String DATABASE_NAME = "tripsMenager.db";
 
     //Table names
     private static final String TABLE_TRIP = "trips";
@@ -51,23 +51,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //Creating table statements
     //Trip table create statement
-    private static final String CREATE_TABLE_TRIP = "CREATE_TABLE "
-            + TABLE_TRIP + "(" + TRIP_ID + " INTEGER PRIMARY KEY NOT NULL,"
-            + TRIP_TITLE + " TEXT," + TRIP_DATE + " DATETIME,"
-            + TRIP_LENGTH + " FLOAT," + TRIP_NOTE + " TEXT" + ")";
+    private static final String CREATE_TABLE_TRIP = "CREATE TABLE "
+            + TABLE_TRIP + "(" + TRIP_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+            + TRIP_TITLE + " TEXT," + TRIP_DATE + " TEXT,"
+            + TRIP_LENGTH + " FLOAT,"
+            + TRIP_NOTE + " TEXT" + ")";
 
     //Localization table create statement
-    private static final String CREATE_TABLE_LOCALIZATION = "CREATE_TABLE "
-            + TABLE_LOCALIZATION + "(" + LOC_ID + " INTEGER PRIMARY KEY NOT NULL,"
+    private static final String CREATE_TABLE_LOCALIZATION = "CREATE TABLE "
+            + TABLE_LOCALIZATION + "(" + LOC_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + LOC_LATITUDE + " TEXT," + LOC_LONGITUDE + " TEXT,"
             + LOC_NAME + " TEXT,"
-            + " FOREIGN KEY ("+TRIP_ID_FK+") REFERENCES "+TABLE_TRIP+"("+TRIP_ID+"));";
+            + TRIP_ID_FK + " TEXT,"
+            + " FOREIGN KEY(" + TRIP_ID_FK + ") REFERENCES "
+            + TABLE_TRIP + "("+TRIP_ID+")" + ");";
 
     //Photo table create statement
-    private static final String CREATE_TABLE_PHOTO = "CREATE_TABLE "
-            + TABLE_PHOTO + "(" + PHOTO_ID + " INTEGER PRIMARY KEY NOT NULL,"
+    private static final String CREATE_TABLE_PHOTO = "CREATE TABLE "
+            + TABLE_PHOTO + "(" + PHOTO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + PHOTO_PATH + " TEXT,"
-            + " FOREIGN KEY ("+LOC_ID_FK+") REFERENCES "+TABLE_LOCALIZATION+"("+LOC_ID+"));";
+            + LOC_ID_FK + " TEXT,"
+            + " FOREIGN KEY (" +LOC_ID_FK+ ") REFERENCES "
+            + TABLE_LOCALIZATION + "("+LOC_ID+")" + ");";
 
 
     public DatabaseHelper(Context context) {
@@ -97,11 +102,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     //CRUD(Create, Read, Update, Delete) Operations
 
     public long createTrip(Trip trip){
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(TRIP_TITLE,trip.getTrip_title());
-        values.put(TRIP_DATE, String.valueOf(trip.getTrip_date()));
+        values.put(TRIP_TITLE, trip.getTrip_title());
+        values.put(TRIP_DATE, trip.getTrip_date());
         values.put(TRIP_LENGTH, trip.getTrip_distance());
         values.put(TRIP_NOTE, trip.getTrip_note());
 
