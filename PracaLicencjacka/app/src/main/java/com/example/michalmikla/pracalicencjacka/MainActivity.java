@@ -30,6 +30,11 @@ public class MainActivity extends AppCompatActivity {
 //        System.out.println("TAKENTRIP: " + takentrip.getTrip_note());
 
     }
+    public void goToMapActivity(View view){
+        Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
     public void goToCreateTripActivity(View view){
         Intent intent = new Intent(this,CreateTripActivity.class);

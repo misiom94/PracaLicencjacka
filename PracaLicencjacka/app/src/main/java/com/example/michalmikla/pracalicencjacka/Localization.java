@@ -63,4 +63,6 @@ public class Localization {
     public void setTrip_ID_fk(Integer trip_ID_fk) {
         this.trip_ID_fk = trip_ID_fk;
     }
+
+
 }
