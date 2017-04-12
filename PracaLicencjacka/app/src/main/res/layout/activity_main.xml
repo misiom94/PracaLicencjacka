@@ -15,7 +15,7 @@
         style="@style/Widget.AppCompat.Button.Borderless.Colored"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="41dp"
         android:onClick="goToCreateTripActivity"
         android:text="Create Trip"
         android:layout_alignParentTop="true"
