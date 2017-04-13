@@ -46,9 +46,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationRequest locationRequest;
     LatLng lastKnownLocation;
     private double latitude, longitude;
-    private List<LatLng> locationHistory;
+    private List<LatLng> locationHistory = new ArrayList<LatLng>();
     Polyline line;
-    private static final int currentZoom = 12;
+    private static final int currentZoom = 15;
+    Location mLastLocation;
 
 
     @Override
@@ -65,7 +66,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addApi(LocationServices.API)
                     .enableAutoManage(this,this)
                     .build();
-            locationHistory = new ArrayList<LatLng>();
         }
         lat = (TextView) findViewById(R.id.textViewLatitude);
         lng = (TextView) findViewById(R.id.textViewLongitude);
@@ -73,13 +73,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
         mMap = googleMap;
-
-
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
-        refreshMaps(googleMap);
         mMap.setOnMarkerClickListener(this);
     }
 
@@ -90,21 +86,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onStart() {
-
         super.onStart();
         mGoogleApiClient.connect();
     }
 
     protected void startLocationUpdates() {
-
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, locationRequest, this);
     }
-
 
     @Override
     public void onLocationChanged(Location location) {
@@ -118,32 +110,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        lat.setText("CONN");
         refreshMaps(mMap);
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            lat.setText("NOT CONN");
+            Toast.makeText(this, "Permission problem !", Toast.LENGTH_SHORT).show();
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         latitude = mLastLocation.getLatitude();
         longitude = mLastLocation.getLongitude();
-
         lat.setText(String.valueOf("LAT: "+latitude));
         lng.setText(String.valueOf("LON: "+longitude));
-
-
         boolean mRequestingLocationUpdates=true;
-
         if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
-
         try{
             locationHistory.add(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
-
         }
         catch (NullPointerException e)
         {
@@ -155,7 +139,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onConnectionSuspended(int i) {
 
     }
-    Location mLastLocation;
+
     public void refreshMaps(GoogleMap map)
     {
         try {
@@ -175,29 +159,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .color(Color.RED));
     }
 
-    public void localizate(View view){
-        refreshMaps(mMap);
-    }
-
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
-
-
     }
-
-
-
 
     @Override
     public boolean onMarkerClick(Marker marker) {
 
         Intent intent = new Intent(this, MarkerActivity.class);
+        LatLng position = marker.getPosition();
+        Double markerLat = position.latitude;
+        Double markerLon = position.longitude;
+        intent.putExtra("title",marker.getTitle());
+        intent.putExtra("lat",markerLat);
+        intent.putExtra("lon",markerLon);
         startActivity(intent);
-        finish();
-
         return false;
-
     }
 
     @Override
