@@ -1,6 +1,7 @@
 package com.example.michalmikla.pracalicencjacka;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -12,6 +13,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -30,14 +33,14 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnPolylineClickListener{
 
     private GoogleMap mMap;
+    private Marker myMarker;
     private TextView lat, lng;
     Localization localization;
     private Location mLocation;
     private LatLng yourLocalization;
-    private int currentZoom;
     private LocationManager locationManager;
     public static GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
@@ -45,6 +48,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private double latitude, longitude;
     private List<LatLng> locationHistory;
     Polyline line;
+    private static final int currentZoom = 12;
 
 
     @Override
@@ -59,6 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
+                    .enableAutoManage(this,this)
                     .build();
             locationHistory = new ArrayList<LatLng>();
         }
@@ -68,30 +73,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        currentZoom = 12;
+
         mMap = googleMap;
+
+
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         refreshMaps(googleMap);
+        mMap.setOnMarkerClickListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStart() {
+
         super.onStart();
+        mGoogleApiClient.connect();
     }
 
     protected void startLocationUpdates() {
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-             lng.setText("DONT HAVE PERMISSION");
-
             return;
         }
         LocationServices.FusedLocationApi.requestLocationUpdates(
@@ -108,19 +115,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onConnected(Bundle bundle) {
-        lat.setText("Connected!");
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        lat.setText("CONN");
+        refreshMaps(mMap);
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            lat.setText("NOT CONN");
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        lat.setText(String.valueOf(mLocation.getLatitude()));
-        lng.setText(String.valueOf(mLastLocation.getLongitude()));
+        latitude = mLastLocation.getLatitude();
+        longitude = mLastLocation.getLongitude();
 
-        refreshMaps(mMap);
+        lat.setText(String.valueOf("LAT: "+latitude));
+        lng.setText(String.valueOf("LON: "+longitude));
+
+
         boolean mRequestingLocationUpdates=true;
 
         if (mRequestingLocationUpdates) {
@@ -129,8 +143,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         try{
             locationHistory.add(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
-            lat.setText(String.valueOf(latitude));
-            lng.setText(String.valueOf(longitude));
+
         }
         catch (NullPointerException e)
         {
@@ -148,16 +161,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         try {
             yourLocalization = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
             map.clear();
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(yourLocalization, map.getCameraPosition().zoom));
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(yourLocalization,currentZoom));
             LatLng lastLoc=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            map.addMarker(new MarkerOptions().position(lastLoc).title("Marker in your localization"));
-            map.addMarker(new MarkerOptions().position(yourLocalization).title("Marker in your localization"));
+            map.addMarker(new MarkerOptions().position(yourLocalization).title("You are here"));
 
         }
         catch(java.lang.NullPointerException e){
 
         }
-        System.out.println(locationHistory.size());
         line=mMap.addPolyline(new PolylineOptions()
                 .addAll(locationHistory)
                 .width(5)
@@ -166,12 +177,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void localizate(View view){
         refreshMaps(mMap);
-        lat.setText(String.valueOf(latitude));
-        lng.setText(String.valueOf(longitude));
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+
+
+    }
+
+
+
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        Intent intent = new Intent(this, MarkerActivity.class);
+        startActivity(intent);
+        finish();
+
+        return false;
+
+    }
+
+    @Override
+    public void onPolylineClick(Polyline polyline) {
 
     }
 }
