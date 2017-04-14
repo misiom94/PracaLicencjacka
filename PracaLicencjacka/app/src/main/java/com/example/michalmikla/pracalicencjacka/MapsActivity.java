@@ -67,6 +67,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .enableAutoManage(this,this)
                     .build();
         }
+
         lat = (TextView) findViewById(R.id.textViewLatitude);
         lng = (TextView) findViewById(R.id.textViewLongitude);
     }
@@ -77,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         googleMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.setOnMarkerClickListener(this);
+        refreshMaps(mMap);
     }
 
     @Override
