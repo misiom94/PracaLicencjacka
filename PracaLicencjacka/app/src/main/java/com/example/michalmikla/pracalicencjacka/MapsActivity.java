@@ -120,8 +120,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        latitude = mLastLocation.getLatitude();
-        longitude = mLastLocation.getLongitude();
+        if(mLastLocation!=null){
+            latitude = mLastLocation.getLatitude();
+            longitude = mLastLocation.getLongitude();
+        }
         lat.setText(String.valueOf("LAT: "+latitude));
         lng.setText(String.valueOf("LON: "+longitude));
         boolean mRequestingLocationUpdates=true;
