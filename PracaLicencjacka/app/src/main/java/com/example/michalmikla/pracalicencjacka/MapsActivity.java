@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +71,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         lat = (TextView) findViewById(R.id.textViewLatitude);
         lng = (TextView) findViewById(R.id.textViewLongitude);
+
+
+
     }
 
     @Override
@@ -113,8 +117,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationRequest.setInterval(3000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         refreshMaps(mMap);
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Toast.makeText(this, "Permission problem !", Toast.LENGTH_SHORT).show();
             return;
@@ -183,5 +185,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPolylineClick(Polyline polyline) {
 
+    }
+    public void goToMarker(View view)
+    {
+        Intent markerIntent = new Intent(this, MarkerActivity.class);
+        startActivity(markerIntent);
+        finish();
     }
 }
