@@ -3,6 +3,8 @@ package com.example.michalmikla.pracalicencjacka;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -11,12 +13,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 public class MarkerActivity extends AppCompatActivity {
     private static final int REQUEST_TAKE_PHOTO = 1;
@@ -25,6 +34,8 @@ public class MarkerActivity extends AppCompatActivity {
     private final double DEFAULT_VALUE = 0;
     private EditText editTextTitle, editTextLocation;
     static protected String currentPhotoPath;
+    private List<String> photoPathList = new ArrayList<>();
+    private TableLayout tableLayout;
 
 
     @Override
@@ -39,7 +50,8 @@ public class MarkerActivity extends AppCompatActivity {
         editTextLocation = (EditText) findViewById(R.id.editTextLocalization);
         editTextTitle.setHint(name);
         editTextLocation.setHint("Place localization: \n" + lat + "\n" + lng);
-
+        tableLayout = (TableLayout) findViewById(R.id.tableLayout);
+        tableLayout.setShrinkAllColumns(true);
     }
 
     public void backToMap(View view) {
@@ -61,11 +73,12 @@ public class MarkerActivity extends AppCompatActivity {
         return image;
     }
 
-    public void cameraClick(View view) {takePicureIntent();
+    public void cameraClick(View view) throws FileNotFoundException {
+        takePicureIntent();
 
     }
 
-    public void takePicureIntent() {
+    public void takePicureIntent() throws FileNotFoundException {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -77,14 +90,66 @@ public class MarkerActivity extends AppCompatActivity {
                 // Error occurred while creating the File
             }
             // Continue only if the File was successfully created
-
             if (photoFile != null) {
                 Uri photoURI = FileProvider.getUriForFile(this,
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                photoPathList.add(photoFile.getAbsolutePath());
             }
+        }
+    }
+
+    public void refreshTable() throws FileNotFoundException {
+        tableLayout.removeAllViews();
+        for (int i = 0; i < photoPathList.size(); i++) {
+            String tmpPath = photoPathList.get(i);
+            TableRow tr = new TableRow(this);
+            ImageView iv = new ImageView(this);
+            setPic(tmpPath, iv);
+            tr.addView(iv);
+            tableLayout.addView(tr);
+            Toast.makeText(this, "TABLE REFRESHED !", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setPic(String path, ImageView imageview) throws FileNotFoundException {
+        // Get the dimensions of the View
+        int targetW = imageview.getWidth();
+        int targetH = imageview.getHeight();
+
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        //bmOptions.inJustDecodeBounds = true;
+        //BitmapFactory.decodeFile(path, bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+
+        int scaleFactor = Math.min(15, 15);//photoW/targetW, photoH/targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+
+        Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
+
+        imageview.setImageBitmap(bitmap);
+
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            refreshTable();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
     }
 }

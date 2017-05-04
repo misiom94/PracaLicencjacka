@@ -34,7 +34,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener, GoogleMap.OnPolylineClickListener{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener{
 
     private GoogleMap mMap;
     private Marker myMarker;
@@ -71,9 +71,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         lat = (TextView) findViewById(R.id.textViewLatitude);
         lng = (TextView) findViewById(R.id.textViewLongitude);
-
-
-
     }
 
     @Override
@@ -87,13 +84,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onResume() {
+
         super.onResume();
+        mGoogleApiClient.connect();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
     }
 
     protected void startLocationUpdates() {
@@ -182,10 +180,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return false;
     }
 
-    @Override
-    public void onPolylineClick(Polyline polyline) {
-
-    }
+//    @Override
+//    public void onPolylineClick(Polyline polyline) {
+//
+//    }
     public void goToMarker(View view)
     {
         Intent markerIntent = new Intent(this, MarkerActivity.class);
