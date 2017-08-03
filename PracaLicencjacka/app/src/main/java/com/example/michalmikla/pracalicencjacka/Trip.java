@@ -19,7 +19,7 @@ public class Trip {
 
     }
 
-    public Trip(int trip_id , String trip_title, String trip_date, Float trip_distance, String trip_note) {
+    public Trip(int trip_id , String trip_title, String trip_date, String trip_note) {
         this.trip_id = trip_id;
         this.trip_title = trip_title;
         this.trip_date = trip_date;

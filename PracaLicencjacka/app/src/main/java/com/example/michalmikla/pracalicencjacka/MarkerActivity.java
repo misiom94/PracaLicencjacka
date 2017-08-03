@@ -7,10 +7,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,9 +30,11 @@ import java.util.Date;
 import java.util.List;
 
 public class MarkerActivity extends AppCompatActivity {
+    private final String LOG = "MARKER ACTIVITY";
     private static final int REQUEST_TAKE_PHOTO = 1;
     String name;
     double lat, lng;
+    private int tripID;
     private final double DEFAULT_VALUE = 0;
     private EditText editTextTitle, editTextLocation;
     static protected String currentPhotoPath;
@@ -42,10 +46,8 @@ public class MarkerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marker);
-        Intent intent = getIntent();
-        name = intent.getStringExtra("title");
-        lat = intent.getDoubleExtra("lat", DEFAULT_VALUE);
-        lng = intent.getDoubleExtra("lon", DEFAULT_VALUE);
+        Intent mapIntent = getIntent();
+        recieveDataFromMap(mapIntent);
         editTextTitle = (EditText) findViewById(R.id.editTextName);
         editTextLocation = (EditText) findViewById(R.id.editTextLocalization);
         editTextTitle.setHint(name);
@@ -54,8 +56,27 @@ public class MarkerActivity extends AppCompatActivity {
         tableLayout.setShrinkAllColumns(true);
     }
 
-    public void backToMap(View view) {
-        this.finish();
+    public void recieveDataFromMap(Intent intent)
+    {
+        tripID = intent.getIntExtra("tripID",0);
+        name = intent.getStringExtra("title");
+        lat = intent.getDoubleExtra("lat", DEFAULT_VALUE);
+        lng = intent.getDoubleExtra("lon", DEFAULT_VALUE);
+        Log.i(LOG,"----Recieved data----" + "\nTrip id: " + tripID + "\nLocalization name: " + name + "\nLocalization lat: "
+        + lat + "\nLocalization long: " + lng);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+
+
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    public void backToMap(View view)
+    {
+       finish();
     }
 
     public File createImageFile() throws IOException {

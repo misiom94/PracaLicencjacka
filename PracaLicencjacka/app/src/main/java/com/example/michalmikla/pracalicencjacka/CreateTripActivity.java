@@ -5,15 +5,22 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CreateTripActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
 
+    private static final String LOG = "CreateTripActivity ";
     EditText tripNameEdit,tripDateEdit,tripNoteEdit;
     String tripName, tripDate, tripNote;
+    DatabaseHelper db;
+    List<Trip> trips = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +29,8 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
         tripNameEdit = (EditText)findViewById(R.id.editTextTripName);
         tripDateEdit = (EditText)findViewById(R.id.editTextStartingDate);
         tripNoteEdit = (EditText)findViewById(R.id.editTextTripNote);
+        db = DatabaseHelper.getInstance(this);
+
     }
 
 
@@ -37,7 +46,18 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
                 tripDate = tripDateEdit.getText().toString();
                 tripNote = tripNoteEdit.getText().toString();
 
+                try{
+                    db.createTripNoClass(db,tripName,tripDate,0,tripNote);
+                    Log.i(LOG," TRIP WAS CREATED !");
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                Trip trip = db.selectTrip();
+                Log.i("LAST TRIP: ",String.valueOf(trip.getTrip_id())+" "+String.valueOf(trip.getTrip_title()));
                 Intent tripIntentData = new Intent(this,MapsActivity.class);
+                tripIntentData.putExtra("tripID",trip.getTrip_id());
                 tripIntentData.putExtra("tripName",tripName);
                 tripIntentData.putExtra("tripDate",tripDate);
                 tripIntentData.putExtra("tripNote",tripNote);

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,8 @@ import java.util.List;
  */
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+
+    private static DatabaseHelper mInstance = null;
 
     //Local tag
     private static final String LOG = "DatabaseHelper";
@@ -74,9 +77,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             + " FOREIGN KEY (" +LOC_ID_FK+ ") REFERENCES "
             + TABLE_LOCALIZATION + "("+LOC_ID+")" + ");";
 
+    private static final String SQL_DELETE_ENTRIES =
+            "DROP TABLE IF EXISTS " + TABLE_PHOTO + "," + TABLE_LOCALIZATION + "," + TABLE_TRIP;
 
-    public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+    private String result;
+
+    public DatabaseHelper(Context applicationContext) {
+        super(applicationContext, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -85,18 +92,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_LOCALIZATION);
         db.execSQL(CREATE_TABLE_PHOTO);
 
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //drop old tables to create new updated
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRIP);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_LOCALIZATION);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_PHOTO);
-
+        db.execSQL(SQL_DELETE_ENTRIES);
         //creating new updated tables
         onCreate(db);
 
+    }
+
+    public static DatabaseHelper getInstance(Context context){
+        if(mInstance==null){
+            mInstance = new DatabaseHelper(context.getApplicationContext());
+        }
+        return mInstance;
     }
 
     //CRUD(Create, Read, Update, Delete) Operations
@@ -113,32 +125,72 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return db.insert(TABLE_TRIP, null, values);
     }
 
+    public long createTripNoClass(DatabaseHelper mDatabaseHelper, String trip_title, String trip_date, float trip_distance, String trip_note)
+    {
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TRIP_TITLE,trip_title);
+        values.put(TRIP_DATE,trip_date);
+        values.put(TRIP_LENGTH,trip_distance);
+        values.put(TRIP_NOTE,trip_note);
+
+        return db.insert(TABLE_TRIP,null,values);
+
+    }
+    public Trip selectTrip(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String querySelect = "SELECT * FROM " + TABLE_TRIP ;
+        Trip trip = new Trip();
+        Cursor c = db.rawQuery(querySelect,null);
+        c.moveToLast();
+        try{
+            trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
+            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
+            trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
+            trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
+            trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
+
+        }catch(NullPointerException e){
+            e.printStackTrace();
+//            Toast.makeText(this,"No data in table!", Toast.LENGTH_SHORT).show();
+            Log.e("DATABSE","NO DATA IN TABLE!");
+        }
+        Log.e(LOG,"TRIP DATA: "+"\n"+trip.getTrip_id()+"\n"+trip.getTrip_title()+"\n"+trip.getTrip_date());
+        return trip;
+
+    }
+
     public Trip getTripById(int trip_id){
         SQLiteDatabase db = this.getReadableDatabase();
         String querySelect = "SELECT * FROM " + TABLE_TRIP + " WHERE "
                 + TRIP_ID + " = " + trip_id;
         Log.e(LOG, querySelect);
+        Trip trip = new Trip();
 
         Cursor c = db.rawQuery(querySelect,null);
-        if(c!=null){
-            c.moveToFirst();
-        }
-        Trip trip = new Trip();
-        trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
-        trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
-        trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
-        trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
-        trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
+        try{
+            if(c!=null) {
+                c.moveToFirst();
+            }
+            trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
+            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
+            trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
+            trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
+            trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
 
+        }catch(NullPointerException e){
+            e.printStackTrace();
+//            Toast.makeText(this,"No data in table!", Toast.LENGTH_SHORT).show();
+            Log.e("DATABSE","NO DATA IN TABLE!");
+        }
+        Log.e(LOG,"TRIP DATA: "+"\n"+trip.getTrip_id()+"\n"+trip.getTrip_title()+"\n"+trip.getTrip_date());
         return trip;
     }
 
-    public List<Trip> getAllTrips(){
-        List<Trip> trips = new ArrayList<Trip>();
+    public ArrayList<Trip> getAllTrips(){
+        ArrayList<Trip> trips = new ArrayList<>();
         String querySelect = "SELECT * FROM " + TABLE_TRIP;
-        Log.e(LOG, querySelect);
         SQLiteDatabase db = this.getReadableDatabase();
-
         Cursor c = db.rawQuery(querySelect,null);
         //looping all rows and adding to list
         if(c.moveToFirst()){
@@ -152,8 +204,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
                 trips.add(trip);
             }while(c.moveToNext());
-        }
+        }Log.i(LOG, querySelect);
         return trips;
+
     }
 
     public int updateTrip(Trip trip){
@@ -293,6 +346,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             photos.add(photo);
         }while(c.moveToNext());
         return photos;
+
     }
 
     public int updatePhoto(Photo photo){
@@ -312,6 +366,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.delete(TABLE_PHOTO, PHOTO_ID + " = ?",
                 new String[]{String.valueOf(photo_id)});
     }
+
+
+
+
 
 
 

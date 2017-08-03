@@ -5,12 +5,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,34 +30,42 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleMap.OnMarkerClickListener, GoogleApiClient.OnConnectionFailedListener{
 
+    private final String LOG = "MAPS_ACTIVITY ";
     private GoogleMap mMap;
-    private Marker myMarker;
-    private TextView lat, lng;
-    Localization localization;
+    private TextView lat, lng;;
     private Location mLocation;
     private LatLng yourLocalization;
-    private LocationManager locationManager;
+    private String tName,tDate,tNote;
+    private int tId;
     public static GoogleApiClient mGoogleApiClient;
     private LocationRequest locationRequest;
-    LatLng lastKnownLocation;
     private double latitude, longitude;
     private List<LatLng> locationHistory = new ArrayList<LatLng>();
     Polyline line;
     private static final int currentZoom = 15;
     Location mLastLocation;
+    DatabaseHelper db;
+    SupportMapFragment mapFragment;
+
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        if(savedInstanceState!=null)
+        {
+
+            longitude = savedInstanceState.getDouble("longitude");
+            latitude = savedInstanceState.getDouble("latitude");
+            Log.i(LOG,"----RECIEVED SAVED INSTANCE DATA----\n"+longitude+"\n"+latitude);
+        }
         setContentView(R.layout.activity_maps);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         if (mGoogleApiClient == null) {
@@ -65,12 +73,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
-                    .enableAutoManage(this,this)
+                    .enableAutoManage(this, this)
                     .build();
         }
+        Intent tripIntent = getIntent();
+        recieveData(tripIntent);
+        actualizeTextView();
+        try{
+            db = new DatabaseHelper(this);
+        }catch(Exception e){
+            Log.e("MA", "DATABSE NOT CREATED !");
+        }
 
+    }
+
+    public void actualizeTextView()
+    {
         lat = (TextView) findViewById(R.id.textViewLatitude);
         lng = (TextView) findViewById(R.id.textViewLongitude);
+
     }
 
     @Override
@@ -87,11 +108,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         super.onResume();
         mGoogleApiClient.connect();
+        actualizeTextView();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Bundle outState = new Bundle();
+
     }
 
     protected void startLocationUpdates() {
@@ -107,6 +137,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocation = location;
         locationHistory.add(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
         refreshMaps(mMap);
+    }
+
+    public void recieveData(Intent intent)
+    {
+        tId   = intent.getIntExtra("tripID",0);
+        tName = intent.getStringExtra("tripName");
+        tDate = intent.getStringExtra("tripDate");
+        tNote = intent.getStringExtra("tripNote");
+        Log.i(LOG, " -----Recieved data----\n Trip id: "+tId+"\nTrip name: "+tName+"\n"+"Trip date: "+tDate);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle saveInstanceState) {
+
+        saveInstanceState.putInt("tripId",tId);
+        saveInstanceState.putString("tripName",tName);
+        saveInstanceState.putString("tripDate",tDate);
+        saveInstanceState.putString("tripNote",tNote);
+        saveInstanceState.putDouble("latitude",latitude);
+        saveInstanceState.putDouble("longitude",longitude);
+        super.onSaveInstanceState(saveInstanceState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        tId = savedInstanceState.getInt("tripId");
+        tName = savedInstanceState.getString("tripName");
+        tDate = savedInstanceState.getString("tripDate");
+        tNote = savedInstanceState.getString("tripNote");
+        latitude = savedInstanceState.getDouble("latitude");
+        longitude = savedInstanceState.getDouble("longitude");
+
     }
 
     @Override
@@ -148,7 +211,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             yourLocalization = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
             map.clear();
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(yourLocalization,currentZoom));
-            LatLng lastLoc=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+//            LatLng lastLoc=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             map.addMarker(new MarkerOptions().position(yourLocalization).title("You are here"));
 
         }
@@ -162,32 +225,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
-    }
-
-    @Override
     public boolean onMarkerClick(Marker marker) {
-
         Intent intent = new Intent(this, MarkerActivity.class);
         LatLng position = marker.getPosition();
-        Double markerLat = position.latitude;
-        Double markerLon = position.longitude;
+        intent.putExtra("tripID",tId);
         intent.putExtra("title",marker.getTitle());
-        intent.putExtra("lat",markerLat);
-        intent.putExtra("lon",markerLon);
+        intent.putExtra("lat",position.latitude);
+        intent.putExtra("lon",position.longitude);
         startActivity(intent);
         return false;
     }
 
-//    @Override
-//    public void onPolylineClick(Polyline polyline) {
-//
-//    }
     public void goToMarker(View view)
     {
         Intent markerIntent = new Intent(this, MarkerActivity.class);
         startActivity(markerIntent);
         finish();
+    }
+
+    public void goToMenu(View view)
+    {
+        Intent menuIntent = new Intent(this, MainActivity.class);
+        startActivity(menuIntent);
+        finish();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }
