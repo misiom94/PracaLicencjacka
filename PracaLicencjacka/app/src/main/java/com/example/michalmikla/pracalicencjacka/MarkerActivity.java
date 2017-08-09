@@ -14,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TableLayout;
@@ -31,15 +32,18 @@ import java.util.List;
 
 public class MarkerActivity extends AppCompatActivity {
     private final String LOG = "MARKER ACTIVITY";
+    private int localizationFlag = 0;
     private static final int REQUEST_TAKE_PHOTO = 1;
     String name;
     double lat, lng;
-    private int tripID;
+    private int tripID,locId;
     private final double DEFAULT_VALUE = 0;
     private EditText editTextTitle, editTextLocation;
+    private Button cameraButton;
     static protected String currentPhotoPath;
     private List<String> photoPathList = new ArrayList<>();
     private TableLayout tableLayout;
+    DatabaseHelper db;
 
 
     @Override
@@ -48,12 +52,15 @@ public class MarkerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_marker);
         Intent mapIntent = getIntent();
         recieveDataFromMap(mapIntent);
+        db = DatabaseHelper.getInstance(this);
+        cameraButton = (Button) findViewById(R.id.buttonPhoto);
         editTextTitle = (EditText) findViewById(R.id.editTextName);
         editTextLocation = (EditText) findViewById(R.id.editTextLocalization);
         editTextTitle.setHint(name);
         editTextLocation.setHint("Place localization: \n" + lat + "\n" + lng);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         tableLayout.setShrinkAllColumns(true);
+        manageCameraButton();
     }
 
     public void recieveDataFromMap(Intent intent)
@@ -64,19 +71,21 @@ public class MarkerActivity extends AppCompatActivity {
         lng = intent.getDoubleExtra("lon", DEFAULT_VALUE);
         Log.i(LOG,"----Recieved data----" + "\nTrip id: " + tripID + "\nLocalization name: " + name + "\nLocalization lat: "
         + lat + "\nLocalization long: " + lng);
-
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-
-
-        super.onSaveInstanceState(outState, outPersistentState);
+    public void manageCameraButton()
+    {
+        if(localizationFlag!=0){
+            cameraButton.setEnabled(true);
+        }
+        else{
+            cameraButton.setEnabled(false);
+        }
     }
 
     public void backToMap(View view)
     {
-       finish();
+        finish();
     }
 
     public File createImageFile() throws IOException {
@@ -91,12 +100,12 @@ public class MarkerActivity extends AppCompatActivity {
         );
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
+        Log.i(LOG,"---CURRENT PHOTO PATH----\n" + currentPhotoPath);
         return image;
     }
 
     public void cameraClick(View view) throws FileNotFoundException {
         takePicureIntent();
-
     }
 
     public void takePicureIntent() throws FileNotFoundException {
@@ -156,12 +165,36 @@ public class MarkerActivity extends AppCompatActivity {
         bmOptions.inJustDecodeBounds = false;
         bmOptions.inSampleSize = scaleFactor;
         bmOptions.inPurgeable = true;
-
         Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
-
         imageview.setImageBitmap(bitmap);
+    }
 
+    public void saveLocalizationToDatabase(View view)
+    {
+        name = String.valueOf(editTextTitle.getText());
+        db.createLocalizationNoClass(lat, lng, name, tripID);
+        Localization localization = db.getLastLocalization();
+        locId = localization.getLoc_ID();
+        Log.i(LOG,"----CREATED LOCALIZATION DATA----:\n ID: " + localization.getLoc_ID()+ "\n LAT: " + localization.getLoc_latitude()
+        +"\n LNG: "+ localization.getLoc_longitude() + "\n TRIP ID: " + localization.getTrip_ID_fk());
+        localizationFlag = 1;
+        manageCameraButton();
+    }
 
+    public void savePhotoToDatabase(View view)
+    {
+        for(int i=0;i<photoPathList.size();i++)
+        {
+            db.createPhoto(photoPathList.get(i),locId);
+            Photo photo = db.getLastPhoto();
+            Log.i(LOG,"----CREATED PHOTO DATA----:\n ID:" + photo.getPhoto_ID()+ "\n PATH: " + photo.getPhoto_path() + "\n LocID: " +
+            photo.getLoc_ID_fk());
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     @Override

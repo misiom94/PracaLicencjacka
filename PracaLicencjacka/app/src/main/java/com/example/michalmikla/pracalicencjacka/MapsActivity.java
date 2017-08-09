@@ -57,17 +57,39 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        //declaration views to show localization
+        lat = (TextView) findViewById(R.id.textViewLatitude);
+        lng = (TextView) findViewById(R.id.textViewLongitude);
+        setContentView(R.layout.activity_maps);
+        setupMap();
         if(savedInstanceState!=null)
         {
-
             longitude = savedInstanceState.getDouble("longitude");
             latitude = savedInstanceState.getDouble("latitude");
+            actualizeLocationView();
             Log.i(LOG,"----RECIEVED SAVED INSTANCE DATA----\n"+longitude+"\n"+latitude);
         }
-        setContentView(R.layout.activity_maps);
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        setupGoogleApiClient();
+        Intent tripIntent = getIntent();
+        recieveData(tripIntent);
+
+        try{
+            db = new DatabaseHelper(this);
+        }catch(Exception e){
+            Log.e(LOG, "DATABSE NOT CREATED !");
+        }
+
+    }
+    private void setupMap(){
+        if(mMap == null){
+            mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                    .findFragmentById(R.id.map);
+            mapFragment.getMapAsync(this);
+        }
+    }
+
+    private void setupGoogleApiClient()
+    {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -76,22 +98,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .enableAutoManage(this, this)
                     .build();
         }
-        Intent tripIntent = getIntent();
-        recieveData(tripIntent);
-        actualizeTextView();
-        try{
-            db = new DatabaseHelper(this);
-        }catch(Exception e){
-            Log.e("MA", "DATABSE NOT CREATED !");
-        }
-
     }
 
-    public void actualizeTextView()
+    public void actualizeLocationView()
     {
-        lat = (TextView) findViewById(R.id.textViewLatitude);
-        lng = (TextView) findViewById(R.id.textViewLongitude);
-
+        lat.setText(String.valueOf("LAT: "+latitude));
+        lng.setText(String.valueOf("LON: "+longitude));
     }
 
     @Override
@@ -105,23 +117,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onResume() {
-
         super.onResume();
         mGoogleApiClient.connect();
-        actualizeTextView();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Bundle outState = new Bundle();
-
     }
 
     protected void startLocationUpdates() {
@@ -182,20 +189,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(this, "Permission problem !", Toast.LENGTH_SHORT).show();
             return;
         }
+        startLocationUpdates();
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
         if(mLastLocation!=null){
             latitude = mLastLocation.getLatitude();
             longitude = mLastLocation.getLongitude();
+
         }
-        lat.setText(String.valueOf("LAT: "+latitude));
-        lng.setText(String.valueOf("LON: "+longitude));
-        startLocationUpdates();
         try{
             locationHistory.add(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
         }
-        catch (NullPointerException e)
-        {
+        catch (NullPointerException e) {
             e.printStackTrace();
         }
     }
@@ -211,9 +215,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             yourLocalization = new LatLng(mLocation.getLatitude(), mLocation.getLongitude());
             map.clear();
             map.animateCamera(CameraUpdateFactory.newLatLngZoom(yourLocalization,currentZoom));
-//            LatLng lastLoc=new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             map.addMarker(new MarkerOptions().position(yourLocalization).title("You are here"));
-
+            latitude = yourLocalization.latitude;
+            longitude = yourLocalization.longitude;
+            Log.i(LOG,"CURRENT LAT: "+latitude+"\n CURRENT LON: "+longitude);
+            actualizeLocationView();
         }
         catch(java.lang.NullPointerException e){
 
@@ -223,7 +229,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .width(5)
                 .color(Color.RED));
     }
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         Intent intent = new Intent(this, MarkerActivity.class);
@@ -235,7 +240,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intent);
         return false;
     }
-
     public void goToMarker(View view)
     {
         Intent markerIntent = new Intent(this, MarkerActivity.class);
@@ -245,9 +249,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public void goToMenu(View view)
     {
-        Intent menuIntent = new Intent(this, MainActivity.class);
-        startActivity(menuIntent);
-        finish();
+        Intent intent = new Intent(getApplicationContext(),MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+
     }
 
     @Override

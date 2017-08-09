@@ -145,7 +145,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.moveToLast();
         try{
             trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
-            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
+            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_TITLE)));
             trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
             trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
             trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
@@ -241,16 +241,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return db.insert(TABLE_LOCALIZATION, null, values);
     }
+    public long createLocalizationNoClass(double latitude, double longitude, String name, int tripId)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(LOC_LATITUDE,latitude);
+        values.put(LOC_LONGITUDE,longitude);
+        values.put(LOC_NAME, name);
+        values.put(TRIP_ID_FK, tripId);
+        return db.insert(TABLE_LOCALIZATION, null, values);
+    }
 
-    public Localization getLocalizationById(int loc_id)
+    public Localization getLastLocalization()
     {
         SQLiteDatabase db = this.getReadableDatabase();
-        String querySelect = "SELECT * FROM " + TABLE_LOCALIZATION + " WHERE "
-                + LOC_ID + " = " + loc_id;
+        String querySelect = "SELECT * FROM " + TABLE_LOCALIZATION;
         Log.e(LOG,querySelect);
         Cursor c = db.rawQuery(querySelect,null);
-        if(c != null){
-            c.moveToFirst();
+        if(c!=null){
+            c.moveToLast();
         }
         Localization localization = new Localization();
         localization.setLoc_ID(c.getInt(c.getColumnIndex(LOC_ID)));
@@ -261,6 +270,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return localization;
 
+
+    }
+
+    public List<Localization> getLocalizationsById(int tripId) {
+        List<Localization> localizations = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String querySelect = "SELECT * FROM " + TABLE_LOCALIZATION + " WHERE "
+                + TRIP_ID_FK + " = " + tripId;
+        Log.e(LOG, querySelect);
+        Cursor c = db.rawQuery(querySelect, null);
+        if (c != null) {
+            c.moveToFirst();
+            do {
+                Localization localization = new Localization();
+                localization.setLoc_ID(c.getInt(c.getColumnIndex(LOC_ID)));
+                localization.setLoc_latitude(c.getFloat(c.getColumnIndex(LOC_LATITUDE)));
+                localization.setLoc_longitude(c.getFloat(c.getColumnIndex(LOC_LONGITUDE)));
+                localization.setLoc_name(c.getString(c.getColumnIndex(LOC_NAME)));
+                localization.setTrip_ID_fk(c.getInt(c.getColumnIndex(TRIP_ID_FK)));
+                localizations.add(localization);
+            } while (c.moveToNext());
+        }
+        return localizations;
     }
 
     public List<Localization> getAllLocalizations(){
@@ -304,14 +336,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[] {String.valueOf(loc_id)});
     }
 
-    public long createPhoto(Photo photo){
+    public long createPhoto(String photoPath, int locIdFk){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(PHOTO_ID, photo.getPhoto_ID());
-        values.put(PHOTO_PATH, photo.getPhoto_path());
-        values.put(LOC_ID_FK, photo.getLoc_ID_fk());
+//        values.put(PHOTO_ID, photo.getPhoto_ID());
+        values.put(PHOTO_PATH, photoPath);
+        values.put(LOC_ID_FK, locIdFk);
         return db.insert(TABLE_PHOTO, null, values);
 
+    }
+
+    public Photo getLastPhoto()
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String querySelect = "SELECT * FROM " + TABLE_PHOTO ;
+        Log.e(LOG, querySelect);
+        Cursor c = db.rawQuery(querySelect, null);
+        if(c != null){
+            c.moveToLast();
+        }
+        Photo photo = new Photo();
+        photo.setPhoto_ID(c.getInt(c.getColumnIndex(PHOTO_ID)));
+        photo.setPhoto_path(c.getString(c.getColumnIndex(PHOTO_PATH)));
+        photo.setLoc_ID_fk(c.getColumnIndex(LOC_ID_FK));
+        return photo;
     }
 
     public Photo getPhoto(int photo_id){
@@ -330,6 +378,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         photo.setLoc_ID_fk(c.getColumnIndex(LOC_ID_FK));
 
         return photo;
+    }
+    public List<Photo> getPhotosById(int locID){
+        SQLiteDatabase db = this.getReadableDatabase();
+        List<Photo> photos = new ArrayList<>();
+        String querySelect = "SELECT * FROM " + TABLE_PHOTO + " WHERE " +
+                LOC_ID_FK + " = " + locID;
+        Log.e(LOG, querySelect);
+        Cursor c = db.rawQuery(querySelect,null);
+        if(c.moveToFirst()){
+            do{
+                Photo photo = new Photo();
+                photo.setPhoto_ID(c.getInt(c.getColumnIndex(PHOTO_ID)));
+                photo.setPhoto_path(c.getString(c.getColumnIndex(PHOTO_PATH)));
+                photo.setLoc_ID_fk(c.getInt(c.getColumnIndex(LOC_ID_FK)));
+                photos.add(photo);
+            }while(c.moveToNext());
+        }
+        return photos;
     }
 
     public List<Photo> getAllPhotos(){

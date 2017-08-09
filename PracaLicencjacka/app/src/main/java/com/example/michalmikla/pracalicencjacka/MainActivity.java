@@ -41,27 +41,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         db = new DatabaseHelper(this);
+        tableView = (TableLayout) findViewById(R.id.TableLayout);
         System.out.println("DATABASE NAME: " + db.getDatabaseName());
-//        db.createTripNoClass(db, "ALLAH AKBAR","21.01.2015", (float) 5.5,"TEST TRIP!");
         try{
-            tableView = (TableLayout) findViewById(R.id.TableLayout);
-            TableRow tr = new TableRow(this);
-            TableRow.LayoutParams lp = new TableRow.LayoutParams(0,TableRow.LayoutParams.MATCH_PARENT,20);
-            tr.setLayoutParams(lp);
-            TextView tvLeft = new TextView(this);
-            tvLeft.setLayoutParams(lp);
-            tvLeft.setBackgroundColor(Color.RED);
-            tvLeft.setText("OMG");
-            tr.addView(tvLeft);
-
-            showDetails = new Button(this);
-            showDetails.setText("Show details");
-            showDetails.setBackgroundColor(Color.BLUE);
-            showDetails.setTextColor(Color.YELLOW);
-            tr.addView(showDetails);
-
-            tableView.addView(tr, new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
-
+            tripList = db.getAllTrips();
+            for(final Trip trip:tripList)
+            {
+                TableRow tr = new TableRow(this);
+                TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
+                tr.setLayoutParams(lp);
+                TextView tvLeft = new TextView(this);
+                tvLeft.setLayoutParams(lp);
+                tvLeft.setText(trip.getTrip_title());
+                tr.addView(tvLeft);
+                showDetails = new Button(this);
+                showDetails.setLayoutParams(lp);
+                showDetails.setText("Show details");
+                showDetails.setTextColor(Color.RED);
+                showDetails.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        goToShowTripActivity(trip);
+                    }
+                });
+                tr.addView(showDetails);
+                tableView.addView(tr, new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.MATCH_PARENT));
+            }
             Toast.makeText(this,"TABLE CREATED!",Toast.LENGTH_SHORT).show();
         }catch(Exception e)
         {
@@ -69,10 +74,16 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this,"TABLE NOT CREATED!",Toast.LENGTH_SHORT).show();
         }
 
-
     }
     public void goToMapActivity(View view){
         Intent intent = new Intent(this, MapsActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    public void goToShowTripActivity(Trip trip){
+        Intent intent = new Intent(this,DisplayTripActivity.class);
+        intent.putExtra("tripId",trip.getTrip_id());
         startActivity(intent);
         finish();
     }
@@ -84,7 +95,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void addRow(TableLayout tableLayout){
-
 
 
     }

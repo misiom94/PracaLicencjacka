@@ -50,7 +50,6 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
                     db.createTripNoClass(db,tripName,tripDate,0,tripNote);
                     Log.i(LOG," TRIP WAS CREATED !");
 
-
                 }catch (Exception e){
                     e.printStackTrace();
                 }
