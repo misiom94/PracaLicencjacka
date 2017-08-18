@@ -51,6 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String PHOTO_ID = "photo_id";
     private static final String PHOTO_PATH = "photo_path";
     private static final String LOC_ID_FK = "loc_id_fk";
+    private static final String PHOTO_DATE = "photo_date";
 
     //Creating table statements
     //Trip table create statement
@@ -73,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_PHOTO = "CREATE TABLE "
             + TABLE_PHOTO + "(" + PHOTO_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
             + PHOTO_PATH + " TEXT,"
+            + PHOTO_DATE + " TEXT,"
             + LOC_ID_FK + " TEXT,"
             + " FOREIGN KEY (" +LOC_ID_FK+ ") REFERENCES "
             + TABLE_LOCALIZATION + "("+LOC_ID+")" + ");";
@@ -173,7 +175,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 c.moveToFirst();
             }
             trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
-            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
+            trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_TITLE)));
             trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
             trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
             trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
@@ -183,7 +185,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 //            Toast.makeText(this,"No data in table!", Toast.LENGTH_SHORT).show();
             Log.e("DATABSE","NO DATA IN TABLE!");
         }
-        Log.e(LOG,"TRIP DATA: "+"\n"+trip.getTrip_id()+"\n"+trip.getTrip_title()+"\n"+trip.getTrip_date());
+        Log.e(LOG,"TRIP DATA: "+"\n"+trip.getTrip_id()+"\n"+trip.getTrip_title()+"\n"+trip.getTrip_title()+"\n"+trip.getTrip_date());
         return trip;
     }
 
@@ -197,7 +199,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 Trip trip = new Trip();
                 trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
-                trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_NOTE)));
+                trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_TITLE)));
                 trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
                 trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
                 trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
@@ -231,7 +233,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public long createLocalization(Localization localization)
     {
         SQLiteDatabase db = this.getWritableDatabase();
-
         ContentValues values = new ContentValues();
         values.put(LOC_ID, localization.getLoc_ID());
         values.put(LOC_LATITUDE, localization.getLoc_latitude());
@@ -269,8 +270,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         localization.setTrip_ID_fk(c.getInt(c.getColumnIndex(TRIP_ID_FK)));
 
         return localization;
+    }
 
+    public Localization getLocalizationById(int locId)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String querySelect = "SELECT * FROM " + TABLE_LOCALIZATION + " WHERE " + LOC_ID +" = " +locId;
+        Log.e(LOG,querySelect);
+        Localization localization = new Localization();
+        Cursor c = db.rawQuery(querySelect,null);
+        if(c!=null){
+            c.moveToFirst();
+            do{
 
+                localization.setLoc_ID(c.getInt(c.getColumnIndex(LOC_ID)));
+                localization.setLoc_latitude(c.getFloat(c.getColumnIndex(LOC_LATITUDE)));
+                localization.setLoc_longitude(c.getFloat(c.getColumnIndex(LOC_LONGITUDE)));
+                localization.setLoc_name(c.getString(c.getColumnIndex(LOC_NAME)));
+                localization.setTrip_ID_fk(c.getInt(c.getColumnIndex(TRIP_ID_FK)));
+
+            }while(c.moveToNext());
+        }
+        return localization;
     }
 
     public List<Localization> getLocalizationsById(int tripId) {
@@ -336,11 +357,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[] {String.valueOf(loc_id)});
     }
 
-    public long createPhoto(String photoPath, int locIdFk){
+    public long createPhoto(String photoPath,String photo_date, int locIdFk){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-//        values.put(PHOTO_ID, photo.getPhoto_ID());
         values.put(PHOTO_PATH, photoPath);
+        values.put(PHOTO_DATE, photo_date);
         values.put(LOC_ID_FK, locIdFk);
         return db.insert(TABLE_PHOTO, null, values);
 
@@ -357,6 +378,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         Photo photo = new Photo();
         photo.setPhoto_ID(c.getInt(c.getColumnIndex(PHOTO_ID)));
+        photo.setPhoto_date(c.getString(c.getColumnIndex(PHOTO_DATE)));
         photo.setPhoto_path(c.getString(c.getColumnIndex(PHOTO_PATH)));
         photo.setLoc_ID_fk(c.getColumnIndex(LOC_ID_FK));
         return photo;
@@ -390,6 +412,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             do{
                 Photo photo = new Photo();
                 photo.setPhoto_ID(c.getInt(c.getColumnIndex(PHOTO_ID)));
+                photo.setPhoto_date(c.getString(c.getColumnIndex(PHOTO_DATE)));
                 photo.setPhoto_path(c.getString(c.getColumnIndex(PHOTO_PATH)));
                 photo.setLoc_ID_fk(c.getInt(c.getColumnIndex(LOC_ID_FK)));
                 photos.add(photo);

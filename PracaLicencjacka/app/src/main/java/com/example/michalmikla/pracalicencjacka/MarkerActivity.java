@@ -40,6 +40,7 @@ public class MarkerActivity extends AppCompatActivity {
     private final double DEFAULT_VALUE = 0;
     private EditText editTextTitle, editTextLocation;
     private Button cameraButton;
+    private Button saveButton;
     static protected String currentPhotoPath;
     private List<String> photoPathList = new ArrayList<>();
     private TableLayout tableLayout;
@@ -54,6 +55,7 @@ public class MarkerActivity extends AppCompatActivity {
         recieveDataFromMap(mapIntent);
         db = DatabaseHelper.getInstance(this);
         cameraButton = (Button) findViewById(R.id.buttonPhoto);
+        saveButton = (Button) findViewById(R.id.buttonSavePhoto);
         editTextTitle = (EditText) findViewById(R.id.editTextName);
         editTextLocation = (EditText) findViewById(R.id.editTextLocalization);
         editTextTitle.setHint(name);
@@ -77,9 +79,12 @@ public class MarkerActivity extends AppCompatActivity {
     {
         if(localizationFlag!=0){
             cameraButton.setEnabled(true);
+            saveButton.setEnabled(true);
+
         }
         else{
             cameraButton.setEnabled(false);
+            saveButton.setEnabled(false);
         }
     }
 
@@ -140,7 +145,6 @@ public class MarkerActivity extends AppCompatActivity {
             setPic(tmpPath, iv);
             tr.addView(iv);
             tableLayout.addView(tr);
-            Toast.makeText(this, "TABLE REFRESHED !", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -185,9 +189,12 @@ public class MarkerActivity extends AppCompatActivity {
     {
         for(int i=0;i<photoPathList.size();i++)
         {
-            db.createPhoto(photoPathList.get(i),locId);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd_HH:mm");
+            String photoDate = sdf.format(new Date());
+            Log.i(LOG,"DATE "+photoDate);
+            db.createPhoto(photoPathList.get(i),photoDate,locId);
             Photo photo = db.getLastPhoto();
-            Log.i(LOG,"----CREATED PHOTO DATA----:\n ID:" + photo.getPhoto_ID()+ "\n PATH: " + photo.getPhoto_path() + "\n LocID: " +
+            Log.i(LOG,"----CREATED PHOTO DATA----:\n ID:" + photo.getPhoto_ID()+"\n DATE: "+photo.getPhoto_date() + "\n PATH: " + photo.getPhoto_path() + "\n LocID: " +
             photo.getLoc_ID_fk());
         }
     }

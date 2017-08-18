@@ -152,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         tName = intent.getStringExtra("tripName");
         tDate = intent.getStringExtra("tripDate");
         tNote = intent.getStringExtra("tripNote");
-        Log.i(LOG, " -----Recieved data----\n Trip id: "+tId+"\nTrip name: "+tName+"\n"+"Trip date: "+tDate);
+        Log.i(LOG, " -----Recieved data----\n Trip id: "+tId+"\nTrip name: "+tName+"\n"+"Trip date: "+tDate+"\nTrip note:"+tNote);
     }
 
     @Override
@@ -197,6 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         }
         try{
+            assert mLastLocation != null;
             locationHistory.add(new LatLng(mLastLocation.getLatitude(),mLastLocation.getLongitude()));
         }
         catch (NullPointerException e) {

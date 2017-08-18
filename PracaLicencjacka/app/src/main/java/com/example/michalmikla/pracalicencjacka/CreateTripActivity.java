@@ -30,9 +30,7 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
         tripDateEdit = (EditText)findViewById(R.id.editTextStartingDate);
         tripNoteEdit = (EditText)findViewById(R.id.editTextTripNote);
         db = DatabaseHelper.getInstance(this);
-
     }
-
 
     public void createTrip(View view)
     {
@@ -45,16 +43,16 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
                 tripName = tripNameEdit.getText().toString();
                 tripDate = tripDateEdit.getText().toString();
                 tripNote = tripNoteEdit.getText().toString();
-
                 try{
+
                     db.createTripNoClass(db,tripName,tripDate,0,tripNote);
-                    Log.i(LOG," TRIP WAS CREATED !");
+                    Log.i(LOG," TRIP WAS CREATED !"+"\n"+tripName+"\n"+tripDate+"\n"+tripNote);
 
                 }catch (Exception e){
                     e.printStackTrace();
                 }
                 Trip trip = db.selectTrip();
-                Log.i("LAST TRIP: ",String.valueOf(trip.getTrip_id())+" "+String.valueOf(trip.getTrip_title()));
+                Log.i("LAST TRIP: ",String.valueOf(trip.getTrip_id())+" "+String.valueOf(trip.getTrip_title())+" "+trip.getTrip_note());
                 Intent tripIntentData = new Intent(this,MapsActivity.class);
                 tripIntentData.putExtra("tripID",trip.getTrip_id());
                 tripIntentData.putExtra("tripName",tripName);
