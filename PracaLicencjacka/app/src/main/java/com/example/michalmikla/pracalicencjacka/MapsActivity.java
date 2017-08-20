@@ -62,22 +62,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lng = (TextView) findViewById(R.id.textViewLongitude);
         setContentView(R.layout.activity_maps);
         setupMap();
-        if(savedInstanceState!=null)
-        {
-            longitude = savedInstanceState.getDouble("longitude");
-            latitude = savedInstanceState.getDouble("latitude");
-            actualizeLocationView();
-            Log.i(LOG,"----RECIEVED SAVED INSTANCE DATA----\n"+longitude+"\n"+latitude);
-        }
+//        if(savedInstanceState!=null)
+//        {
+//            longitude = savedInstanceState.getDouble("longitude");
+//            latitude = savedInstanceState.getDouble("latitude");
+//            actualizeLocationView();
+//            Log.i(LOG,"----RECIEVED SAVED INSTANCE DATA----\n"+longitude+"\n"+latitude);
+//        }
         setupGoogleApiClient();
         Intent tripIntent = getIntent();
         recieveData(tripIntent);
-
-        try{
-            db = new DatabaseHelper(this);
-        }catch(Exception e){
-            Log.e(LOG, "DATABSE NOT CREATED !");
-        }
+        db = new DatabaseHelper(this);
 
     }
     private void setupMap(){
@@ -100,10 +95,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void actualizeLocationView()
+    public void actualizeLocationView(double latitude, double longitude)
     {
-        lat.setText(String.valueOf("LAT: "+latitude));
-        lng.setText(String.valueOf("LON: "+longitude));
+        try{
+            Log.i(LOG,"LOCALIZATION REFRESHED");
+            lat.setText(String.valueOf("LAT: "+latitude));
+            Log.i(LOG,"LAT: "+latitude);
+            lng.setText(String.valueOf("LON: "+longitude));
+            Log.i(LOG,"LON: "+longitude);
+        }catch(NullPointerException e ){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -143,7 +145,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
         mLocation = location;
         locationHistory.add(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-        refreshMaps(mMap);
+//        refreshMaps(mMap);
+//        actualizeLocationView(mLastLocation.getLatitude(),mLastLocation.getLongitude());
     }
 
     public void recieveData(Intent intent)
@@ -220,9 +223,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             latitude = yourLocalization.latitude;
             longitude = yourLocalization.longitude;
             Log.i(LOG,"CURRENT LAT: "+latitude+"\n CURRENT LON: "+longitude);
-            actualizeLocationView();
+            actualizeLocationView(latitude,longitude);
         }
         catch(java.lang.NullPointerException e){
+            e.printStackTrace();
 
         }
         line=mMap.addPolyline(new PolylineOptions()
@@ -241,18 +245,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivity(intent);
         return false;
     }
-    public void goToMarker(View view)
-    {
-        Intent markerIntent = new Intent(this, MarkerActivity.class);
-        startActivity(markerIntent);
-        finish();
-    }
 
     public void goToMenu(View view)
     {
         Intent intent = new Intent(getApplicationContext(),MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
-
     }
 
     @Override

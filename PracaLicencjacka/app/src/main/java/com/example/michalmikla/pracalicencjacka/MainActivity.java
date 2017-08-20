@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+//    PIXABAY - stronka z darmowymi zdjeciami
     private static  DatabaseHelper db;
     Trip trip, takentrip;
     Button showDetails;
@@ -48,13 +50,16 @@ public class MainActivity extends AppCompatActivity {
             for(final Trip trip:tripList)
             {
                 TableRow tr = new TableRow(this);
-                TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
+                TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
                 tr.setLayoutParams(lp);
                 TextView tvLeft = new TextView(this);
                 tvLeft.setLayoutParams(lp);
+                tvLeft.setTextSize(18);
+                tvLeft.setTextColor(Color.RED);
                 tvLeft.setText(trip.getTrip_title());
                 tr.addView(tvLeft);
-                showDetails = new Button(this);
+                Button showDetails = (Button)getLayoutInflater().inflate(R.layout.button_style, null);
+                showDetails.setTextSize(15);
                 showDetails.setLayoutParams(lp);
                 showDetails.setText("Show details");
                 showDetails.setTextColor(Color.RED);

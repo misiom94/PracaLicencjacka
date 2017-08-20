@@ -76,7 +76,6 @@ public class DisplayPhotoActivity extends AppCompatActivity {
         TableRow.LayoutParams displayParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
         displayParams.setMargins(0,15,0,0);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
-//        lp.setMargins(100,0,0,0);
         lp.gravity = Gravity.CENTER_HORIZONTAL;
         for(final Photo p:photos) {
 
@@ -99,12 +98,16 @@ public class DisplayPhotoActivity extends AppCompatActivity {
             TableRow buttonRow = new TableRow(this);
 //            buttonRow.setLayoutParams(lp);
             buttonRow.setGravity(Gravity.CENTER_HORIZONTAL);
-            Button button = new Button(this);
+            Button button = (Button)getLayoutInflater().inflate(R.layout.button_style, null);
             button.setText("Delete");
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    deletePhoto(p);
+                    try {
+                        deletePhoto(p);
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             buttonRow.addView(button);
@@ -113,14 +116,16 @@ public class DisplayPhotoActivity extends AppCompatActivity {
             tableLayout.addView(buttonRow);
         }
     }
-    private void deletePhoto(Photo photo){
+    private void deletePhoto(Photo photo) throws FileNotFoundException {
         db.deletePhoto(photo.getPhoto_ID());
-        try {
-            refreshTable();
-            Log.i(LOG,"PHOTO" +photo.getPhoto_ID()+" DELETED !");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        refreshTable();
+        refreshActivity();
+//        try {
+//            refreshTable();
+//            Log.i(LOG,"PHOTO" +photo.getPhoto_ID()+" DELETED !");
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private void setPic(String path, ImageView imageview) throws FileNotFoundException {
@@ -129,6 +134,12 @@ public class DisplayPhotoActivity extends AppCompatActivity {
         Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
         imageview.setImageBitmap(bitmap);
         imageview.setRotation(90);
+    }
+
+    private void refreshActivity(){
+        Intent intent = getIntent();
+        finish();
+        startActivity(intent);
     }
 
 }

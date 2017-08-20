@@ -57,9 +57,8 @@ public class MarkerActivity extends AppCompatActivity {
         cameraButton = (Button) findViewById(R.id.buttonPhoto);
         saveButton = (Button) findViewById(R.id.buttonSavePhoto);
         editTextTitle = (EditText) findViewById(R.id.editTextName);
-        editTextLocation = (EditText) findViewById(R.id.editTextLocalization);
         editTextTitle.setHint(name);
-        editTextLocation.setHint("Place localization: \n" + lat + "\n" + lng);
+//        editTextLocation.setHint("Place localization: \n" + lat + "\n" + lng);
         tableLayout = (TableLayout) findViewById(R.id.tableLayout);
         tableLayout.setShrinkAllColumns(true);
         manageCameraButton();
@@ -80,7 +79,6 @@ public class MarkerActivity extends AppCompatActivity {
         if(localizationFlag!=0){
             cameraButton.setEnabled(true);
             saveButton.setEnabled(true);
-
         }
         else{
             cameraButton.setEnabled(false);
@@ -149,28 +147,10 @@ public class MarkerActivity extends AppCompatActivity {
     }
 
     private void setPic(String path, ImageView imageview) throws FileNotFoundException {
-        // Get the dimensions of the View
-        int targetW = imageview.getWidth();
-        int targetH = imageview.getHeight();
-
-        // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        //bmOptions.inJustDecodeBounds = true;
-        //BitmapFactory.decodeFile(path, bmOptions);
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-
-        int scaleFactor = Math.min(15, 15);//photoW/targetW, photoH/targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-        bmOptions.inPurgeable = true;
         Bitmap bitmap = BitmapFactory.decodeFile(path, bmOptions);
         imageview.setImageBitmap(bitmap);
+        imageview.setRotation(90);
     }
 
     public void saveLocalizationToDatabase(View view)
