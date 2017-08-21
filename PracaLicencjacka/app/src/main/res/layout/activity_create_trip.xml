@@ -4,29 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/trip_background"
     tools:context="com.example.michalmikla.pracalicencjacka.CreateTripActivity">
 
     <TextView
         android:id="@+id/textViewTripName"
-        android:layout_width="wrap_content"
-        android:layout_height="17dp"
-        android:layout_marginBottom="8dp"
+        android:layout_width="160dp"
+        android:layout_height="26dp"
         android:layout_marginLeft="0dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
         android:text="TRIP NAME"
         android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:layout_constraintHorizontal_bias="0.501" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/editTextTripName"
         android:layout_width="0dp"
-        android:layout_height="42dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
+        android:background="@android:drawable/alert_light_frame"
         android:ems="10"
         android:hint="Trip Name"
         android:inputType="textPersonName"
@@ -34,17 +35,17 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTripName"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewTripName" />
 
     <TextView
         android:id="@+id/textViewTripDate"
-        android:layout_width="wrap_content"
-        android:layout_height="17dp"
-        android:layout_marginTop="14dp"
-        android:text="Trip Starting Date"
+        android:layout_width="210dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="24dp"
+        android:text="TRIP START DATE"
         android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.WindowTitle"
+        app:layout_constraintHorizontal_bias="0.505"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTripName" />
@@ -52,10 +53,11 @@
     <EditText
         android:id="@+id/editTextStartingDate"
         android:layout_width="0dp"
-        android:layout_height="42dp"
+        android:layout_height="50dp"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginTop="16dp"
+        android:background="@android:drawable/alert_light_frame"
         android:ems="10"
         android:hint="Starting Date"
         android:inputType="date"
@@ -68,62 +70,68 @@
 
     <TextView
         android:id="@+id/textViewTripNote"
-        android:layout_width="0dp"
-        android:layout_height="17dp"
-        android:text="Trip Note"
-        android:textAlignment="center"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        android:layout_width="320dp"
+        android:layout_height="42dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="23dp"
+        android:text="TRIP NOTE"
+        android:textAlignment="center"
+        android:textAppearance="@android:style/TextAppearance.DeviceDefault.WindowTitle"
+        app:layout_constraintHorizontal_bias="0.481"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextStartingDate" />
 
     <EditText
         android:id="@+id/editTextTripNote"
-        android:layout_width="379dp"
-        android:layout_height="79dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="376dp"
+        android:layout_height="133dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="15dp"
+        android:background="@android:drawable/alert_light_frame"
         android:ems="10"
         android:hint="You can write here your notes from trip"
         android:inputType="textMultiLine"
         android:textAlignment="center"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textViewTripNote"
-        app:layout_constraintVertical_bias="0.0"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp" />
+        app:layout_constraintHorizontal_bias="0.0" />
 
     <Button
         android:id="@+id/buttonStartTrip"
+        style="@android:style/Widget.Button.Toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginTop="16dp"
         android:onClick="createTrip"
         android:text="Start Trip "
+        android:textAppearance="@android:style/TextAppearance.Widget.Button"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTripNote" />
+        android:layout_marginTop="25dp"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTripNote"
+        app:layout_constraintHorizontal_bias="0.498" />
 
     <Button
         android:id="@+id/buttonMainMenu"
+        style="@android:style/Widget.Button.Toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginLeft="32dp"
         android:layout_marginRight="32dp"
         android:layout_marginTop="16dp"
         android:onClick="backToMainMenu"
         android:text="MAIN MENU"
+        android:textAppearance="@android:style/TextAppearance.Widget.Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonStartTrip"
-        app:layout_constraintVertical_bias="0.068" />
+        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.498" />
 </android.support.constraint.ConstraintLayout>

@@ -37,7 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private final String LOG = "MAPS_ACTIVITY ";
     private GoogleMap mMap;
-    private TextView lat, lng;;
+    private TextView lat, lng;
     private Location mLocation;
     private LatLng yourLocalization;
     private String tName,tDate,tNote;
@@ -95,17 +95,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void actualizeLocationView(double latitude, double longitude)
-    {
-        try{
-            Log.i(LOG,"LOCALIZATION REFRESHED");
-            lat.setText(String.valueOf("LAT: "+latitude));
-            Log.i(LOG,"LAT: "+latitude);
-            lng.setText(String.valueOf("LON: "+longitude));
-            Log.i(LOG,"LON: "+longitude);
-        }catch(NullPointerException e ){
-            e.printStackTrace();
-        }
+    private void fillTextView (String latitude, String longitude) {
+        TextView tv_lat = (TextView) findViewById(R.id.textViewLatitude);
+        TextView tv_lng = (TextView) findViewById(R.id.textViewLongitude);
+        tv_lat.setText(latitude); // tv is null
+        tv_lng.setText(longitude);
     }
 
     @Override
@@ -145,8 +139,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLocationChanged(Location location) {
         mLocation = location;
         locationHistory.add(new LatLng(mLocation.getLatitude(), mLocation.getLongitude()));
-//        refreshMaps(mMap);
-//        actualizeLocationView(mLastLocation.getLatitude(),mLastLocation.getLongitude());
+        refreshMaps(mMap);
+
     }
 
     public void recieveData(Intent intent)
@@ -197,7 +191,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(mLastLocation!=null){
             latitude = mLastLocation.getLatitude();
             longitude = mLastLocation.getLongitude();
-
         }
         try{
             assert mLastLocation != null;
@@ -223,7 +216,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             latitude = yourLocalization.latitude;
             longitude = yourLocalization.longitude;
             Log.i(LOG,"CURRENT LAT: "+latitude+"\n CURRENT LON: "+longitude);
-            actualizeLocationView(latitude,longitude);
+            fillTextView(String.valueOf(latitude),String.valueOf(longitude));
+
+//            actualizeLocationView(latitude,longitude);
         }
         catch(java.lang.NullPointerException e){
             e.printStackTrace();
