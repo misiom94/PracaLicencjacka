@@ -62,13 +62,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         lng = (TextView) findViewById(R.id.textViewLongitude);
         setContentView(R.layout.activity_maps);
         setupMap();
-//        if(savedInstanceState!=null)
-//        {
-//            longitude = savedInstanceState.getDouble("longitude");
-//            latitude = savedInstanceState.getDouble("latitude");
-//            actualizeLocationView();
-//            Log.i(LOG,"----RECIEVED SAVED INSTANCE DATA----\n"+longitude+"\n"+latitude);
-//        }
         setupGoogleApiClient();
         Intent tripIntent = getIntent();
         recieveData(tripIntent);

@@ -3,6 +3,7 @@ package com.example.michalmikla.pracalicencjacka;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -73,9 +74,11 @@ public class DisplayPhotoActivity extends AppCompatActivity {
     }
     public void refreshTable() throws FileNotFoundException {
         tableLayout.removeAllViews();
-        TableRow.LayoutParams displayParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
-        displayParams.setMargins(0,15,0,0);
+        TableRow.LayoutParams displayParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
+        displayParams.setMargins(0,15,15,0);
         TableRow.LayoutParams lp = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT);
+        TableLayout.LayoutParams buttonParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT,Gravity.CENTER);
+        buttonParams.setMargins(0,15,0,0);
         lp.gravity = Gravity.CENTER_HORIZONTAL;
         for(final Photo p:photos) {
 
@@ -88,18 +91,23 @@ public class DisplayPhotoActivity extends AppCompatActivity {
             String date = p.getPhoto_date();
             Log.i(LOG,"table date: " + date);
             displayText.setText("Created at: " + p.getPhoto_date());
+            displayText.setTextColor(Color.BLACK);
+            displayText.setTextSize(20);
             row.addView(displayText);
             TableRow tr = new TableRow(this);
             tr.setLayoutParams(lp);
             ImageView iv = new ImageView(this);
-            iv.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.MATCH_PARENT));
+            TableRow.LayoutParams imageParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT,Gravity.CENTER_HORIZONTAL);
+            iv.setLayoutParams(imageParams);
             setPic(tmpPath, iv);
             tr.addView(iv);
             TableRow buttonRow = new TableRow(this);
-//            buttonRow.setLayoutParams(lp);
+            buttonRow.setLayoutParams(buttonParams);
+//            buttonRow.setLayoutParams(new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT,Gravity.CENTER_HORIZONTAL));
             buttonRow.setGravity(Gravity.CENTER_HORIZONTAL);
             Button button = (Button)getLayoutInflater().inflate(R.layout.button_style, null);
             button.setText("Delete");
+            button.setTextColor(Color.BLACK);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

@@ -1,16 +1,20 @@
 package com.example.michalmikla.pracalicencjacka;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.CursorIndexOutOfBoundsException;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -58,6 +62,22 @@ public class DisplayTripActivity extends AppCompatActivity implements OnMapReady
         mMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
+    public void deleteTrip(View view)
+    {
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to delete this trip?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        db.deleteTrip(tripID);
+                        Intent intent = new Intent(getApplicationContext(),MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+
     public void recieveDataFromMap(Intent intent)
     {
         tripID = intent.getIntExtra("tripId",0);
@@ -70,7 +90,11 @@ public class DisplayTripActivity extends AppCompatActivity implements OnMapReady
         textTitle.setText(trip.getTrip_title());
         textNote.setText(trip.getTrip_note());
         textDate.setText(trip.getTrip_date());
-        showLocalizations(tripID);
+        try {
+            showLocalizations(tripID);
+        }catch (CursorIndexOutOfBoundsException e){
+            Toast.makeText(this,"NO LOCATIONS AVAIABLE", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void goToMainMenu(View view)

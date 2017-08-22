@@ -203,7 +203,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
                 trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
                 trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
-
                 trips.add(trip);
             }while(c.moveToNext());
         }Log.i(LOG, querySelect);
