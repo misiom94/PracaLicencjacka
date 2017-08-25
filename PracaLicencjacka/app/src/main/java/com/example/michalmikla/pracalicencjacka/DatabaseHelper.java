@@ -115,18 +115,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     //CRUD(Create, Read, Update, Delete) Operations
 
-    public long createTrip(Trip trip){
-        SQLiteDatabase db = getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(TRIP_TITLE, trip.getTrip_title());
-        values.put(TRIP_DATE, trip.getTrip_date());
-        values.put(TRIP_LENGTH, trip.getTrip_distance());
-        values.put(TRIP_NOTE, trip.getTrip_note());
-
-        return db.insert(TABLE_TRIP, null, values);
-    }
-
     public long createTripNoClass(DatabaseHelper mDatabaseHelper, String trip_title, String trip_date, float trip_distance, String trip_note)
     {
         SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
@@ -201,13 +189,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 trip.setTrip_id(c.getInt(c.getColumnIndex(TRIP_ID)));
                 trip.setTrip_title(c.getString(c.getColumnIndex(TRIP_TITLE)));
                 trip.setTrip_date(c.getString(c.getColumnIndex(TRIP_DATE)));
-                trip.setTrip_distance(c.getFloat(c.getColumnIndex(TRIP_LENGTH)));
                 trip.setTrip_note(c.getString(c.getColumnIndex(TRIP_NOTE)));
                 trips.add(trip);
             }while(c.moveToNext());
         }Log.i(LOG, querySelect);
         return trips;
-
     }
 
     public int updateTrip(Trip trip){

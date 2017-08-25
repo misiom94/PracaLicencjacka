@@ -124,11 +124,6 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
-    public void addRow(TableLayout tableLayout){
-
-
-    }
-
     @Override
     public void finish() {
         super.finish();
