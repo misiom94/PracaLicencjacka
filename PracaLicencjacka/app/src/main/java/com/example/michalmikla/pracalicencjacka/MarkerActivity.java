@@ -163,8 +163,9 @@ public class MarkerActivity extends AppCompatActivity {
         db.createLocalizationNoClass(lat, lng, name, tripID);
         Localization localization = db.getLastLocalization();
         locId = localization.getLoc_ID();
-        Log.i(LOG,"----CREATED LOCALIZATION DATA----:\n ID: " + localization.getLoc_ID()+ "\n LAT: " + localization.getLoc_latitude()
-        +"\n LNG: "+ localization.getLoc_longitude() + "\n TRIP ID: " + localization.getTrip_ID_fk());
+        Log.i(LOG,"----CREATED LOCALIZATION DATA----:\n ID: " + localization.getLoc_ID()+ "\n LAT: " +
+                localization.getLoc_latitude() +"\n LNG: "+ localization.getLoc_longitude() +
+                "\n TRIP ID: " + localization.getTrip_ID_fk());
         localizationFlag = 1;
         manageCameraButton();
     }

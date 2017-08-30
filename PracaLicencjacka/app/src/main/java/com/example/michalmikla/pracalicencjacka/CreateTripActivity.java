@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class CreateTripActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
@@ -77,7 +78,13 @@ public class CreateTripActivity extends AppCompatActivity implements DatePickerD
         }
     }
     public void setDate(View view){
-        DatePickerDialog dialog = new DatePickerDialog(this, this, 2015,5,15);
+        Calendar c = Calendar.getInstance();
+        int mYear = c.get(Calendar.YEAR);
+        int mMonth = c.get(Calendar.MONTH);
+        int mDay = c.get(Calendar.DAY_OF_MONTH);
+
+        DatePickerDialog dialog =
+                new DatePickerDialog(this, this, mYear, mMonth, mDay);
         dialog.show();
     }
 
